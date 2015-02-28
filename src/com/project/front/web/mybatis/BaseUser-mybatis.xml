@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codyy.project.front.web.entity.BaseUser">
+	
+	<sql id="asMapper">
+		BASE_USER_ID	AS	id,
+		REAL_NAME	AS	realName,
+		USERNAME	AS username,
+		password	as password,
+		phone_num	as phoneNum,
+		head_pic	as headPic,
+		account_id	as accountId,
+		email	as email,
+		sex,
+		birth_date as birthDate,
+		user_type	as userType,
+		state,
+		to_char(create_time, 'yyyy-MM-dd hh24:mi:ss') as createTime, 
+		r_accountId as rAccountId,
+		change_init_psd as	changeInitPsd
+	</sql>
+	
+	<sql id="Base_Where_Clause">
+		<if test="id != null"> and BASE_USER_ID = #{id}</if>
+		<if test="userType != null">and USER_TYPE = #{userType}</if>
+		<if test="username !=null">and USERNAME = #{username}</if>
+		<if test="accountId !=null">and account_id = #{accountId}</if>
+		<if test="realName !=null">and real_name = #{realName}</if>
+		<if test="password !=null">and password=#{password}</if>
+		
+		<!-- 模糊查询 -->
+		<!-- <if test="username !=null">and USERNAME LIKE '%${username}%'</if> -->
+	</sql>
+	<sql id="update_base">
+		base_user_id = base_user_id
+		<if test="realName !=null">,real_name = #{realName}</if>
+		<if test="username !=null">,username = #{username}</if>
+		<if test="password !=null">,password = #{password}</if>
+		<if test="phoneNum !=null">,phone_num = #{phoneNum}</if>
+		<if test="headPic !=null">,head_pic = #{headPic}</if>
+		<if test="accountId !=null">,account_id = #{accountId}</if>
+		<if test="email !=null">,email = #{email}</if>
+		<if test="sex !=null">,sex = #{sex}</if>
+		<if test="birthDate !=null">,birth_date = #{birthDate}</if>
+		<if test="userType !=null">,user_type = #{userType}</if>
+		<if test="state !=null">,state = #{state}</if>
+		<if test="rAccountId !=null">,r_accountId = #{rAccountId}</if>
+		<if test="changeInitPsd !=null">,change_init_psd = #{changeInitPsd}</if>
+	</sql>
+	<select id="listAll" resultType="com.codyy.project.front.web.entity.BaseUser">
+		select <include refid="asMapper"/> from base_user  where user_type = 'TEACHER' 
+	</select>
+	<select id="getObject" parameterType="com.codyy.project.front.web.entity.BaseUser" resultType="com.codyy.project.front.web.entity.BaseUser">
+		select 
+		<include refid="asMapper"/>
+		from BASE_USER WHERE 1=1 
+		<include refid="Base_Where_Clause"/>
+	</select>
+	<insert id="insert">
+		insert into base_user
+							(
+							base_user_id,
+							username,
+							password,
+							real_name,
+							phone_num,
+							<if test="headPic !=null">head_pic,</if>
+							account_id,
+							email,
+							sex,
+							birth_date,
+							user_type,
+							<if test="state !=null">state,</if>
+							create_time,
+							create_base_user_id,
+							r_accountid
+							<if test="changeInitPsd !=null">,change_init_psd</if>
+							)
+					values(
+							#{id},
+							#{username},
+							#{password},
+							#{realName},
+							#{phoneNum},
+							<if test="headPic !=null">#{headPic},</if>
+							#{accountId},
+							#{email},
+							#{sex},
+							#{birthDate},
+							#{userType},
+							<if test="state !=null">#{state},</if>
+							to_date(#{createTime},'yyyy-MM-dd hh24:mi:ss'),
+							#{createBaseUserId},
+							#{rAccountId}
+							<if test="changeInitPsd !=null">,#{changeInitPsd}</if>
+						)	
+	</insert>
+	<insert id="batchInsert" parameterType="java.util.List">
+		insert into base_user
+							(
+							base_user_id,
+							username,
+							password,
+							real_name,
+							phone_num,
+							head_pic,
+							account_id,
+							email,
+							sex,
+							birth_date,
+							user_type,
+							state,
+							create_time,
+							create_base_user_id,
+							r_accountid,
+							change_init_psd
+							) 
+					<foreach collection="list" item="item" index="index" separator="union all">  
+						select 
+							#{item.id},
+							#{item.username},
+							#{item.password},
+							#{item.realName},
+							#{item.phoneNum},
+							#{item.headPic},
+							#{item.accountId},
+							#{item.email},
+							#{item.sex},
+							#{item.birthDate},
+							#{item.userType},
+							#{item.state},
+							to_date(#{item.createTime},'yyyy-MM-dd hh24:mi:ss'),
+							#{item.createBaseUserId},
+							#{item.rAccountId} ,
+							#{item.changeInitPsd} from dual
+				    </foreach>
+	</insert>
+	<update id="update" parameterType="com.codyy.project.front.web.entity.BaseUser">
+		update base_user set 
+			<include refid="update_base"/>
+			where base_user_id = #{id}
+	</update>
+	<update id="updateParent" parameterType="com.codyy.project.front.web.entity.BaseUser">
+		update base_user set username = #{username},real_name = #{realName},phone_num=#{phoneNum} where base_user_id = #{id}
+	</update>
+	<update id="lockOrUnlockUser" parameterType="java.util.Map">
+		update  base_user set state = #{state} where base_user_id = #{baseUserId}
+	</update>
+	<select id="getById" parameterType="string" resultType="com.codyy.project.front.web.entity.BaseUser">
+		select 
+		<include refid="asMapper"/>
+		from BASE_USER WHERE 1=1 and base_user_id = #{value}
+	</select>
+	<select id="findByAccountId" parameterType="string" resultType="com.codyy.project.front.web.entity.BaseUser">
+		select 
+		<include refid="asMapper"/>
+		from BASE_USER WHERE 1=1 and account_Id = #{value}
+	</select>
+	<select id="findByUsername" parameterType="string" resultType="com.codyy.project.front.web.entity.BaseUser">
+		select  
+		<include refid="asMapper"/>
+		from BASE_USER WHERE 1=1 and username = #{value}
+	</select>
+	<select id="findListBySchoolId" parameterType="string" resultType="com.codyy.project.front.web.entity.BaseUser">
+		select t.base_user_id as id from base_teacher tea,base_user t where t.base_user_id= tea.base_user_id and tea.base_school_id = #{value}
+		union
+		select t.base_user_id as id from base_student s ,base_user t where t.base_user_id = s.base_user_id and s.base_school_id = #{value}
+		
+	</select>
+	<!-- 登录验证 -->
+	<select id="validateLogin" parameterType="com.codyy.project.front.web.entity.BaseUser" resultType="com.codyy.project.front.web.entity.BaseUser">
+		select 
+		<include refid="asMapper"/>
+		from BASE_USER WHERE 1=1 and (username=#{username} or account_Id=#{username}) and password = #{password}
+	</select>
+	<select id="validataUser" parameterType="com.codyy.project.front.web.entity.BaseUser" resultType="com.codyy.project.front.web.entity.BaseUser" >
+		select 
+		<include refid="asMapper"/>
+		from BASE_USER WHERE 1=1 and (username=#{accountId} or account_Id=#{accountId}) and password = #{password} and user_type = #{userType}
+	</select>
+	<select id="validateBindParent" parameterType="com.codyy.project.front.web.entity.BaseUser" resultType="com.codyy.project.front.web.entity.BaseUser">
+		select 
+			<include refid="asMapper"/>
+			from BASE_USER WHERE 1=1 and (username=#{accountId} or account_Id=#{accountId}) and password = #{password} 	and user_type='PARENT'
+	</select>
+	<select id="checkUsername" parameterType="com.codyy.project.front.web.entity.BaseUser" resultType="int">
+		select count(*) as num from base_user 
+			where (username = #{username} or account_Id=#{username}) 
+			<if test="id !=null">
+				and base_user_id !=#{id}
+			</if>
+			
+	</select>
+	<select id="findParentsByStudentId" parameterType="string" resultType="com.codyy.project.front.web.entity.BaseUser">
+		select 
+				t.BASE_USER_ID	AS	id,
+				t.REAL_NAME	AS	realName,
+				t.USERNAME	AS username,
+				t.password	as password,
+				t.phone_num	as phoneNum,
+				t.head_pic	as headPic,
+				t.account_id	as accountId,
+				t.email	as email,
+				t.sex,
+				t.birth_date as birthDate,
+				t.user_type	as userType,
+				t.state,
+				to_char(t.create_time, 'yyyy-MM-dd hh24:mi:ss') as createTime, 
+				t.r_accountId,
+				t.change_init_psd as	changeInitPsd
+			from base_user t ,student_r_parents r where t.base_user_id = r.base_user_id and r.base_student_id = #{value}
+	
+	</select>
+	<select id="getStudentIdByAccountId" parameterType="string" resultType="string">
+		select s.base_student_id from base_user t,base_student s where s.base_user_id = t.base_user_Id and t.account_Id= #{value}
+	</select>
+	<select id="getBaseUserIdAndName"  resultType="com.codyy.project.front.web.entity.BaseUser">
+		select t.base_user_id as id ,t.real_name as realName from base_user t where t.base_user_id in
+		<foreach item="item" index="index" collection="array"	open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<!-- 根据班级id获取所有家长id 班级私信群发  yangyongwu -->
+	<select id="getParentUserIdByClassroomId" resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT DISTINCT SP.BASE_USER_ID
+		FROM
+		BASE_STUDENT STU,STUDENT_R_PARENTS SP
+		WHERE
+		STU.BASE_STUDENT_ID = SP.BASE_STUDENT_ID
+		AND STU.BASE_CLASSROOM_ID = #{classroomId}
+	</select>
+	
+</mapper>
